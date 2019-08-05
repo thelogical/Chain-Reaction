@@ -6,4 +6,4 @@ Contains Undocumented code.Contact me for documented version(swapnil.ace9719@gma
 
 Finally some success!!
 After about 10000 iterations AI was able to defeat Random play by some margin.\
-Will be pushing documented version and project descfiption soon!
+Will be pushing documented version and project description soon!
