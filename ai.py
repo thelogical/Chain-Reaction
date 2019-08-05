@@ -7,6 +7,7 @@ import tkMessageBox
 import sys
 import random
 import thread
+import time
 
 sys.setrecursionlimit(1000000000)
 
@@ -47,7 +48,7 @@ def get_neighbours(box):
 
 
 def game_ended():
-    p = (player + 1) % 2
+    p = (player + 1)%2
     for box in range(36):
         if grid_memory[box][1] == p:
             return False

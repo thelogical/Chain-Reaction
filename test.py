@@ -3,9 +3,11 @@ import queue
 from Tkinter import *
 import tkMessageBox
 import sys
+from threading import Thread
 import time
 from Network import *
 import os
+import torch
 
 sys.setrecursionlimit(100000)
 
@@ -68,22 +70,11 @@ def clear_board():
     textRect = text.get_rect()
     textRect.center = (175, 25)
     screen.blit(text, textRect)
-    text = f2.render(str(int(score)), True, (0,0,0))
-    textRect = text.get_rect()
-    textRect.center = (425, 25)
-    screen.blit(text, textRect)
-    score = Prediction_Network.scores.get_score()
-    text = f2.render(str(int(score)), True, (77, 148, 255))
-    textRect = text.get_rect()
-    textRect.center = (425, 25)
-    screen.blit(text, textRect)
     pygame.display.update()
 
 def start_fission(box,player,flag = False):
-    global ended
-    if ended:
-        return None
     if flag:
+        global ended
         if game_ended() and ended == 0:
             ended = 1
             time.sleep(0.01)
@@ -113,10 +104,11 @@ def start_fission(box,player,flag = False):
 
     else:
         if not flag and grid_memory[box][1] != player:
-            window = Tk()
-            window.withdraw()
-            tkMessageBox.showerror("Error", "Invalid move!")
-            window.mainloop()
+            #window = Tk()
+            #window.withdraw()
+            #tkMessageBox.showerror("Error", "Invalid move!")
+            #window.mainloop()
+            print 'INVALID MOVE!!!'
             return None
         text = font.render(str(grid_memory[box][0]), True, (0,0,0))
         textRect = text.get_rect()
@@ -174,7 +166,6 @@ dif = 0
 score = 0
 Prediction_Network = brain(36,36,10000)
 Prediction_Network.net.to('cuda')
-
 size = 6
 for i in range(6):
     for j in range(6):
@@ -202,67 +193,24 @@ def get_valid():
             valid.append(box)
     return valid
 
-
 every = 100
 i = 0
 size = Prediction_Network.mem.size
-first = True
-st = []
-St = []
-eval = True
+Prediction_Network.load('/root/chain.')
 while not is_done():
     player = 0
-    reward = 0
-    i +=1
-    if first:
-        st = get_st()
-        first = False
-    box1 = Prediction_Network.next_action(st,get_valid())
+    box1 = Prediction_Network.next_action(get_st(),get_valid(),True)
     start_fission(box1, player)
-    if not first and (sum(x < 0 for x in st) > sum(x < 0 for x in St)):
-        st_orbs = sum(x < 0 for x in st)
-        St_orbs = sum(x < 0 for x in St)
-        reward += 5*(st_orbs-St_orbs)
-    if not first and (sum(x > 0 for x in st) > sum(x > 0 for x in St)):
-        st_orbs = sum(x > 0 for x in st)
-        St_orbs = sum(x > 0 for x in St)
-        reward -= 5 * (st_orbs - St_orbs)
     if ended == 1:
-        Prediction_Network.mem.save([st, get_st(), 200 + reward, box1])
         clear_board()
-        Prediction_Network.scores.push(reward)
-        first = True
         ended = 0
         continue
-    Prediction_Network.scores.push(reward)
     player = 1
     box2 = get_random_choice()
     start_fission(box2, player)
-    St = get_st()
     if ended == 1:
-        Prediction_Network.mem.save([st, St, -200 + reward, box1])
         clear_board()
         ended = 0
-        first = True
         continue
-    if sum(x < 0 for x in st) > sum(x < 0 for x in St):
-        st_orbs = sum(x < 0 for x in st)
-        St_orbs = sum(x < 0 for x in St)
-        reward += 5 * (st_orbs - St_orbs)
-    if sum(x > 0 for x in st) > sum(x > 0 for x in St):
-        st_orbs = sum(x > 0 for x in st)
-        St_orbs = sum(x > 0 for x in St)
-        reward -= 5 * (st_orbs - St_orbs)
-    Prediction_Network.scores.push(reward)
-    Prediction_Network.mem.save([st,St,reward,box1])
-    if i > size/10:
-        sam = Prediction_Network.mem.sample(64)
-        Prediction_Network.learn(sam)
-        i = size/10 + 1
-    st = St
-    if games%1000 == 0 and games != 0:
-        print 'Saving model...'
-        Prediction_Network.save('/root/chain.')
-        print 'Done...'
 
 
