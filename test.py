@@ -20,7 +20,7 @@ def get_random_choice():
     choices = []
     global player
     for box in range(36):
-        if grid_memory[box][1] == 1 or grid_memory[box][1] is None:
+        if grid_memory[box][1] == player or grid_memory[box][1] is None:
             choices.append(box)
     return random.choice(choices)
 
@@ -193,24 +193,51 @@ def get_valid():
             valid.append(box)
     return valid
 
+def captured(st,St):
+    sum = 0
+    for b1,b2 in zip(st,St):
+        if b1*b2 < 0:
+            sum += np.sign(b2-b1)
+    return sum
+
 every = 100
 i = 0
 size = Prediction_Network.mem.size
 Prediction_Network.load('/root/chain.')
+first = True
+st = []
+St = []
 while not is_done():
     player = 0
-    box1 = Prediction_Network.next_action(get_st(),get_valid(),True)
+    reward = 0
+    i += 1
+    if first:
+        st = get_st()
+        first = False
+    box1 = Prediction_Network.next_action(st, get_valid())
     start_fission(box1, player)
     if ended == 1:
         clear_board()
+        Prediction_Network.scores.push(reward)
+        first = True
         ended = 0
         continue
+    Prediction_Network.scores.push(reward)
     player = 1
     box2 = get_random_choice()
     start_fission(box2, player)
+    St = get_st()
     if ended == 1:
         clear_board()
         ended = 0
+        first = True
         continue
+    factor = captured(st,St)
+    if factor !=0:
+        s = np.array(st).reshape(6,6)
+        S = np.array(St).reshape(6,6)
+    Prediction_Network.scores.push(reward)
+    #print Prediction_Network.scores.get_score()
+    st = St
 
 

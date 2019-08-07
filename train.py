@@ -202,6 +202,13 @@ def get_valid():
             valid.append(box)
     return valid
 
+def captured(st,St):
+    sum = 0
+    for b1,b2 in zip(st,St):
+        if b1*b2 < 0:
+            sum += np.sign(b2-b1)
+    return sum
+
 
 every = 100
 i = 0
@@ -219,22 +226,13 @@ while not is_done():
         first = False
     box1 = Prediction_Network.next_action(st,get_valid())
     start_fission(box1, player)
-    if not first and (sum(x < 0 for x in st) > sum(x < 0 for x in St)):
-        st_orbs = sum(x < 0 for x in st)
-        St_orbs = sum(x < 0 for x in St)
-        reward += 5*(st_orbs-St_orbs)
-    if not first and (sum(x > 0 for x in st) > sum(x > 0 for x in St)):
-        st_orbs = sum(x > 0 for x in st)
-        St_orbs = sum(x > 0 for x in St)
-        reward -= 5 * (st_orbs - St_orbs)
     if ended == 1:
         Prediction_Network.mem.save([st, get_st(), 200 + reward, box1])
         clear_board()
-        Prediction_Network.scores.push(reward)
+        Prediction_Network.scores.push(200 + reward)
         first = True
         ended = 0
         continue
-    Prediction_Network.scores.push(reward)
     player = 1
     box2 = get_random_choice()
     start_fission(box2, player)
@@ -242,18 +240,12 @@ while not is_done():
     if ended == 1:
         Prediction_Network.mem.save([st, St, -200 + reward, box1])
         clear_board()
+        Prediction_Network.scores.push(-200 + reward)
         ended = 0
         first = True
         continue
-    if sum(x < 0 for x in st) > sum(x < 0 for x in St):
-        st_orbs = sum(x < 0 for x in st)
-        St_orbs = sum(x < 0 for x in St)
-        reward += 5 * (st_orbs - St_orbs)
-    if sum(x > 0 for x in st) > sum(x > 0 for x in St):
-        st_orbs = sum(x > 0 for x in st)
-        St_orbs = sum(x > 0 for x in St)
-        reward -= 5 * (st_orbs - St_orbs)
-    Prediction_Network.scores.push(reward)
+    cpt = captured(st,St)
+    reward = 4 * cpt
     Prediction_Network.mem.save([st,St,reward,box1])
     if i > size/10:
         sam = Prediction_Network.mem.sample(64)

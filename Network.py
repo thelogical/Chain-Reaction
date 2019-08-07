@@ -64,10 +64,13 @@ class score:
         self.window.append(sc)
 
     def get_score(self):
-        return float(sum(self.window))/len(self.window)
+        if len(self.window) < 10:
+            return float(sum(self.window))/(len(self.window)+1)
+        else:
+            return float(sum(self.window[-10:]))/10
 
 class brain:
-    def __init__(self,input_size,actions,size,gamma=0.9):
+    def __init__(self,input_size,actions,size,gamma=0.95):
         self.net = Network(input_size,actions)
         self.mem = Memory(size)
         self.optimizer = optim.Adam(self.net.parameters(),lr=0.0001)
@@ -85,6 +88,7 @@ class brain:
         qval_action = dict(zip(q_values,valid.cpu().tolist()))
         if test:
             mval = max(q_values)
+            self.net.train()
             return qval_action[mval]
         ind = probs.multinomial(1)                                #index of selected probability
         value = q_values[ind]                                     #qvalue corrsponding to probability
