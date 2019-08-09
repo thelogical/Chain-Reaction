@@ -173,7 +173,6 @@ ended = 0
 dif = 0
 score = 0
 Prediction_Network = brain(36,36,10000)
-Prediction_Network.net.to('cuda')
 
 size = 6
 for i in range(6):
@@ -198,7 +197,7 @@ def get_st():
 def get_valid():
     valid = []
     for box in range(36):
-        if grid_memory[box][1] in [0,None]:
+        if grid_memory[box][1] in [player,None]:
             valid.append(box)
     return valid
 
@@ -232,9 +231,13 @@ while not is_done():
         Prediction_Network.scores.push(200 + reward)
         first = True
         ended = 0
+        if games % 1000 == 0:
+            print 'Saving model...'
+            Prediction_Network.save('/root/PycharmProjects/chain/weights/chain')
+            print 'Done...'
         continue
     player = 1
-    box2 = get_random_choice()
+    box2 = Prediction_Network.next_action(get_st(),get_valid(),True)
     start_fission(box2, player)
     St = get_st()
     if ended == 1:
@@ -243,18 +246,22 @@ while not is_done():
         Prediction_Network.scores.push(-200 + reward)
         ended = 0
         first = True
+        if games % 1000 == 0:
+            print 'Saving model...'
+            Prediction_Network.save('/root/PycharmProjects/chain/weights/chain')
+            print 'Done...'
         continue
     cpt = captured(st,St)
-    reward = 4 * cpt
+    reward = 10 * cpt
     Prediction_Network.mem.save([st,St,reward,box1])
-    if i > size/10:
+    if i > 128:
         sam = Prediction_Network.mem.sample(64)
         Prediction_Network.learn(sam)
-        i = size/10 + 1
+        i = 128
     st = St
-    if games%1000 == 0 and games != 0:
-        print 'Saving model...'
-        Prediction_Network.save('/root/chain.')
-        print 'Done...'
+
+for p in Prediction_Network.net.parameters():
+    print p
+    print p.size()
 
 

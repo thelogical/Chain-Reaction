@@ -203,7 +203,7 @@ def captured(st,St):
 every = 100
 i = 0
 size = Prediction_Network.mem.size
-Prediction_Network.load('/root/chain.')
+Prediction_Network.load('/root/PycharmProjects/chain/weights/chain')
 first = True
 st = []
 St = []
@@ -214,7 +214,8 @@ while not is_done():
     if first:
         st = get_st()
         first = False
-    box1 = Prediction_Network.next_action(st, get_valid())
+    time.sleep(1)
+    box1 = Prediction_Network.next_action(st, get_valid(),True)
     start_fission(box1, player)
     if ended == 1:
         clear_board()
@@ -225,6 +226,7 @@ while not is_done():
     Prediction_Network.scores.push(reward)
     player = 1
     box2 = get_random_choice()
+    time.sleep(1)
     start_fission(box2, player)
     St = get_st()
     if ended == 1:
@@ -232,10 +234,6 @@ while not is_done():
         ended = 0
         first = True
         continue
-    factor = captured(st,St)
-    if factor !=0:
-        s = np.array(st).reshape(6,6)
-        S = np.array(St).reshape(6,6)
     Prediction_Network.scores.push(reward)
     #print Prediction_Network.scores.get_score()
     st = St

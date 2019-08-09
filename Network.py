@@ -14,25 +14,29 @@ class Network(nn.Module):
         super(Network,self).__init__()
         self.input_size = input_size
         self.actions = actions
-        self.fc1 = nn.Linear(input_size,400)
-        self.bn1 = nn.BatchNorm1d(400)
-        self.fc2 = nn.Linear(400,228)
-        self.bn2 = nn.BatchNorm1d(228)
-        self.fc3 = nn.Linear(228, 128)
-        self.bn3 = nn.BatchNorm1d(128)
-        self.fc4 = nn.Linear(128,64)
-        self.bn4 = nn.BatchNorm1d(64)
-        self.fc5 = nn.Linear(64,36)
+        self.fc1 = nn.Linear(input_size,1000)
+        self.bn1 = nn.BatchNorm1d(1000)
+        self.fc2 = nn.Linear(1000,400)
+        self.drop1 = nn.Dropout(0.4)
+        self.bn2 = nn.BatchNorm1d(400)
+        self.fc3 = nn.Linear(400, 228)
+        self.bn3 = nn.BatchNorm1d(228)
+        self.fc4 = nn.Linear(228,100)
+        self.drop2 = nn.Dropout(0.2)
+        self.bn4 = nn.BatchNorm1d(100)
+        self.fc5 = nn.Linear(100,36)
 
     def forward(self, input_batch):
         x = self.fc1(input_batch)
         x = self.bn1(x)
+        x = self.drop1(x)
         x = f.relu(x)
         x = self.fc2(x)
         x = self.bn2(x)
         x = f.relu(x)
         x = self.fc3(x)
         x = self.bn3(x)
+        x = self.drop2(x)
         x = f.relu(x)
         x = self.fc4(x)
         x = self.bn4(x)
@@ -64,19 +68,24 @@ class score:
         self.window.append(sc)
 
     def get_score(self):
-        if len(self.window) < 10:
-            return float(sum(self.window))/(len(self.window)+1)
+        if not self.window:
+            return 0
         else:
-            return float(sum(self.window[-10:]))/10
+            return sum(self.window)/float(len(self.window))
+
 
 class brain:
     def __init__(self,input_size,actions,size,gamma=0.95):
         self.net = Network(input_size,actions)
+        self.target_net = Network(input_size,actions)
         self.mem = Memory(size)
         self.optimizer = optim.Adam(self.net.parameters(),lr=0.0001)
         self.gamma = gamma
         self.moves = 0
         self.scores = score(10000)
+        self.target_net.load_state_dict(self.net.state_dict())
+        self.net.to('cuda')
+        self.target_net.to('cuda')
 
     def next_action(self,input_batch,valid,test=True):
         input_batch = torch.tensor(input_batch).unsqueeze(0).type('torch.FloatTensor').cuda()
@@ -105,21 +114,27 @@ class brain:
         actions = actions.unsqueeze(0).view(len(actions),1).cuda()
         out = self.net.forward(st).gather(1,actions)
         St = torch.tensor(mem_batch[:,1].tolist()).type('torch.FloatTensor').cuda()
-        next_max_out = self.net.forward(St).max(1)[0]
+        next_max_out = self.target_net.forward(St).max(1)[0]
         reward = torch.tensor(mem_batch[:,2].tolist()).type('torch.FloatTensor').cuda()
         target = reward + self.gamma*next_max_out.detach()
         td_loss = f.smooth_l1_loss(torch.squeeze(out,1),target)
         self.optimizer.zero_grad()
         td_loss.backward()
         self.optimizer.step()
-        if self.moves >= 100:
+        if self.moves % 100 == 0:
             #print list(x.grad for x in  self.net.parameters())
             #print "\n"
             print self.scores.get_score(),td_loss.item()
+            for p in self.net.parameters():
+                p.data.clamp_(-1,1)
             #with open("/root/Desktop/loss.txt",'a+') as F:
              #   F.write(str(td_loss.item())+'\n')
             #print "\n"
+        if self.moves >= 400:
             self.moves = 0
+            self.target_net.load_state_dict(self.net.state_dict())
+            print "target Updated!"
+
 
     def save(self,path):
         torch.save(self.net.state_dict(),path)
