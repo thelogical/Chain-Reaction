@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import queue
 import tkMessageBox
 import sys
@@ -7,36 +6,12 @@ from Network import *
 import os
 
 sys.setrecursionlimit(100000)
-
-=======
-import pygame
-import queue
-from Tkinter import *
-import tkMessageBox
-import sys
-from threading import Thread
-import time
-from Network import *
-import os
-import torch
-
-sys.setrecursionlimit(100000)
-
-def is_done():
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            return True
->>>>>>> 4631417433b9fe3484e5be3e7646e58ce4dc3f9e
 
 def get_random_choice():
     choices = []
     global player
     for box in range(36):
-<<<<<<< HEAD
-        if grid_memory[box][1] == 1 or grid_memory[box][1] is None:
-=======
         if grid_memory[box][1] == player or grid_memory[box][1] is None:
->>>>>>> 4631417433b9fe3484e5be3e7646e58ce4dc3f9e
             choices.append(box)
     return random.choice(choices)
 
@@ -62,33 +37,13 @@ def game_ended():
 def clear_board():
     global player,games,dif,score
     for box in range(36):
-<<<<<<< HEAD
         grid_memory[box][0] = 0
         grid_memory[box][1] = None
     games += 1
-=======
-        pygame.draw.rect(screen,(0,0,0),(grid[box][0]+1 ,grid[box][1]+1 ,98,98),0)
-        grid_memory[box][0] = 0
-        grid_memory[box][1] = None
-    text = f2.render(str(games), True, (0, 0, 0))
-    textRect = text.get_rect()
-    textRect.center = (45, 25)
-    screen.blit(text, textRect)
-    games += 1
-    text = f2.render(str(games), True, (255, 255, 0))
-    textRect = text.get_rect()
-    textRect.center = (45, 25)
-    screen.blit(text, textRect)
-    text = f2.render(str(dif), True, (0, 0, 0))
-    textRect = text.get_rect()
-    textRect.center = (175, 25)
-    screen.blit(text, textRect)
->>>>>>> 4631417433b9fe3484e5be3e7646e58ce4dc3f9e
     if player==1:
         dif -= 1
     else:
         dif +=1
-<<<<<<< HEAD
     score = Prediction_Network.scores.get_score()
     if games>100:
         print("Evaluation Stats:")
@@ -100,21 +55,8 @@ def clear_board():
         os._exit(0)
 
 def start_fission(box,player,flag = False):
-    global ended
-    if ended:
-        return None
-    if flag:
-=======
-    text = f2.render(str(dif), True, (255, 150, 75))
-    textRect = text.get_rect()
-    textRect.center = (175, 25)
-    screen.blit(text, textRect)
-    pygame.display.update()
-
-def start_fission(box,player,flag = False):
     if flag:
         global ended
->>>>>>> 4631417433b9fe3484e5be3e7646e58ce4dc3f9e
         if game_ended() and ended == 0:
             ended = 1
             time.sleep(0.01)
@@ -122,71 +64,27 @@ def start_fission(box,player,flag = False):
     if grid_memory[box][1] is None:
         grid_memory[box][0] += 1
         grid_memory[box][1] = player
-<<<<<<< HEAD
-=======
-        text = font.render(str(grid_memory[box][0]), True, color[player])
-        textRect = text.get_rect()
-        textRect.center = (grid[box][0] + 50, grid[box][1] + 50)
-        screen.blit(text, textRect)
-        pygame.display.update(textRect)
->>>>>>> 4631417433b9fe3484e5be3e7646e58ce4dc3f9e
         return None
 
     if grid_memory[box][0] >= 3:
         get_neighbours(box)
         while not q.empty():
             nbox = q.get()
-<<<<<<< HEAD
-=======
-            text = font.render(str(grid_memory[box][0]), True, (0, 0, 0))
-            textRect = text.get_rect()
-            textRect.center = (grid[box][0] + 50, grid[box][1] + 50)
-            screen.blit(text, textRect)
-            pygame.display.update(textRect)
->>>>>>> 4631417433b9fe3484e5be3e7646e58ce4dc3f9e
             grid_memory[box][0] = 0
             grid_memory[box][1] = None
             start_fission(nbox,player,flag = True)
 
     else:
         if not flag and grid_memory[box][1] != player:
-<<<<<<< HEAD
             return None
         grid_memory[box][0] += 1
         grid_memory[box][1] = player
-=======
-            #window = Tk()
-            #window.withdraw()
-            #tkMessageBox.showerror("Error", "Invalid move!")
-            #window.mainloop()
-            print 'INVALID MOVE!!!'
-            return None
-        text = font.render(str(grid_memory[box][0]), True, (0,0,0))
-        textRect = text.get_rect()
-        textRect.center = (grid[box][0] + 50, grid[box][1] + 50)
-        screen.blit(text, textRect)
-        grid_memory[box][0] += 1
-        grid_memory[box][1] = player
-        text = font.render(str(grid_memory[box][0]), True, color[player])
-        textRect = text.get_rect()
-        textRect.center = (grid[box][0] + 50, grid[box][1] + 50)
-        screen.blit(text, textRect)
-        pygame.display.update(textRect)
->>>>>>> 4631417433b9fe3484e5be3e7646e58ce4dc3f9e
         if ended == 1:
             return None
         if box in [0, 5, 30, 35] and grid_memory[box][0] > 1:
             get_neighbours(box)
             while not q.empty():
                 nbox = q.get()
-<<<<<<< HEAD
-=======
-                text = font.render(str(grid_memory[box][0]), True, (0, 0, 0))
-                textRect = text.get_rect()
-                textRect.center = (grid[box][0] + 50, grid[box][1] + 50)
-                screen.blit(text, textRect)
-                pygame.display.update(textRect)
->>>>>>> 4631417433b9fe3484e5be3e7646e58ce4dc3f9e
                 grid_memory[box][0] = 0
                 grid_memory[box][1] = None
                 start_fission(nbox, player, flag=True)
@@ -195,54 +93,23 @@ def start_fission(box,player,flag = False):
             get_neighbours(box)
             while not q.empty():
                 nbox = q.get()
-<<<<<<< HEAD
-=======
-                text = font.render(str(grid_memory[box][0]), True, (0, 0, 0))
-                textRect = text.get_rect()
-                textRect.center = (grid[box][0] + 50, grid[box][1] + 50)
-                screen.blit(text, textRect)
-                pygame.display.update(textRect)
->>>>>>> 4631417433b9fe3484e5be3e7646e58ce4dc3f9e
                 grid_memory[box][0] = 0
                 grid_memory[box][1] = None
                 start_fission(nbox, player, flag=True)
 
 
-<<<<<<< HEAD
 
-
-=======
-pygame.init()
-screen = pygame.display.set_mode((700, 700))
-start = (50,50)
-grid = []
->>>>>>> 4631417433b9fe3484e5be3e7646e58ce4dc3f9e
 grid_memory = [[0,None] for i in range(36)]
 player = 0
 color = [(0,255,0),(0,0,255)]
 q = queue.Queue()
-<<<<<<< HEAD
-=======
-font = pygame.font.Font('freesansbold.ttf', 32)
-f2 = pygame.font.Font('freesansbold.ttf', 15)
->>>>>>> 4631417433b9fe3484e5be3e7646e58ce4dc3f9e
 games = 0
 ended = 0
 dif = 0
 score = 0
 Prediction_Network = brain(36,36,10000)
-<<<<<<< HEAD
-=======
 Prediction_Network.net.to('cuda')
 size = 6
-for i in range(6):
-    for j in range(6):
-        grid.append((start[0] + j *100,start[1] + i * 100))
-
-for i in range(6*6):
-        pygame.draw.rect(screen, (255,255,255), (grid[i][0], grid[i][1], 100, 100), 1)
-pygame.display.flip()
->>>>>>> 4631417433b9fe3484e5be3e7646e58ce4dc3f9e
 
 def get_st():
     game_state = []
@@ -258,11 +125,7 @@ def get_st():
 def get_valid():
     valid = []
     for box in range(36):
-<<<<<<< HEAD
         if grid_memory[box][1] in [player,None]:
-=======
-        if grid_memory[box][1] in [0,None]:
->>>>>>> 4631417433b9fe3484e5be3e7646e58ce4dc3f9e
             valid.append(box)
     return valid
 
@@ -273,7 +136,7 @@ def captured(st,St):
             sum += np.sign(b2-b1)
     return sum
 
-<<<<<<< HEAD
+
 Prediction_Network.load('weights/chain')
 every = 100
 i = 0
@@ -297,35 +160,6 @@ while True:
         continue
     player = 1
     box2 = get_random_choice()
-=======
-every = 100
-i = 0
-size = Prediction_Network.mem.size
-Prediction_Network.load('/root/PycharmProjects/chain/weights/chain')
-first = True
-st = []
-St = []
-while not is_done():
-    player = 0
-    reward = 0
-    i += 1
-    if first:
-        st = get_st()
-        first = False
-    box1 = Prediction_Network.next_action(st, get_valid(),True)
-    #time.sleep(1)
-    start_fission(box1, player)
-    if ended == 1:
-        clear_board()
-        Prediction_Network.scores.push(reward)
-        first = True
-        ended = 0
-        continue
-    Prediction_Network.scores.push(reward)
-    player = 1
-    box2 = get_random_choice()
-    #time.sleep(1)
->>>>>>> 4631417433b9fe3484e5be3e7646e58ce4dc3f9e
     start_fission(box2, player)
     St = get_st()
     if ended == 1:
@@ -333,11 +167,6 @@ while not is_done():
         ended = 0
         first = True
         continue
-<<<<<<< HEAD
-=======
-    Prediction_Network.scores.push(reward)
-    #print Prediction_Network.scores.get_score()
->>>>>>> 4631417433b9fe3484e5be3e7646e58ce4dc3f9e
     st = St
 
 
