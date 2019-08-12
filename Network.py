@@ -129,7 +129,11 @@ class brain:
         if self.moves % 100 == 0:
             #print list(x.grad for x in  self.net.parameters())
             #print "\n"
+<<<<<<< HEAD
             print(self.scores.get_score(),td_loss.item())
+=======
+            print self.scores.get_score(),td_loss.item()
+>>>>>>> 4631417433b9fe3484e5be3e7646e58ce4dc3f9e
             #for p in self.net.parameters():
                 #p.data.clamp_(-1,1)
             #with open("/root/Desktop/loss.txt",'a+') as F:
@@ -138,7 +142,11 @@ class brain:
         if self.moves >= 400:
             self.moves = 0
             self.target_net.load_state_dict(self.net.state_dict())
+<<<<<<< HEAD
             print("target Updated!")
+=======
+            print "target Updated!"
+>>>>>>> 4631417433b9fe3484e5be3e7646e58ce4dc3f9e
 
 
     def save(self,path):
