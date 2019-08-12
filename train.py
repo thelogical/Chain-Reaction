@@ -208,7 +208,7 @@ def captured(st,St):
             sum += np.sign(b2-b1)
     return sum
 
-
+Prediction_Network.load('/root/PycharmProjects/chain/weights/chain')
 every = 100
 i = 0
 size = Prediction_Network.mem.size
@@ -223,7 +223,10 @@ while not is_done():
     if first:
         st = get_st()
         first = False
-    box1 = Prediction_Network.next_action(st,get_valid())
+    if np.random.uniform(0,1) > 0.85:
+        box1 = random.choice(get_valid())
+    else:
+        box1 = Prediction_Network.next_action(st,get_valid())
     start_fission(box1, player)
     if ended == 1:
         Prediction_Network.mem.save([st, get_st(), 200 + reward, box1])
@@ -231,13 +234,13 @@ while not is_done():
         Prediction_Network.scores.push(200 + reward)
         first = True
         ended = 0
-        if games % 1000 == 0:
+        if games % 500 == 0:
             print 'Saving model...'
             Prediction_Network.save('/root/PycharmProjects/chain/weights/chain')
             print 'Done...'
         continue
     player = 1
-    box2 = Prediction_Network.next_action(get_st(),get_valid(),True)
+    box2 = Prediction_Network.next_action(get_st(),get_valid())
     start_fission(box2, player)
     St = get_st()
     if ended == 1:

@@ -16,32 +16,37 @@ class Network(nn.Module):
         self.actions = actions
         self.fc1 = nn.Linear(input_size,1000)
         self.bn1 = nn.BatchNorm1d(1000)
-        self.fc2 = nn.Linear(1000,400)
-        self.drop1 = nn.Dropout(0.4)
-        self.bn2 = nn.BatchNorm1d(400)
-        self.fc3 = nn.Linear(400, 228)
-        self.bn3 = nn.BatchNorm1d(228)
-        self.fc4 = nn.Linear(228,100)
-        self.drop2 = nn.Dropout(0.2)
-        self.bn4 = nn.BatchNorm1d(100)
-        self.fc5 = nn.Linear(100,36)
+        self.fc2 = nn.Linear(1000,719)
+        self.drop1 = nn.Dropout(0.5)
+        self.bn2 = nn.BatchNorm1d(719)
+        self.fc3 = nn.Linear(719, 885)
+        self.bn3 = nn.BatchNorm1d(885)
+        self.fc4 = nn.Linear(885,400)
+        self.drop2 = nn.Dropout(0.7)
+        self.bn4 = nn.BatchNorm1d(400)
+        self.fc5 = nn.Linear(400,211)
+        self.bn5 = nn.BatchNorm1d(211)
+        self.fc6 = nn.Linear(211,actions)
 
     def forward(self, input_batch):
         x = self.fc1(input_batch)
         x = self.bn1(x)
         x = self.drop1(x)
-        x = f.relu(x)
+        x = f.leaky_relu(x)
         x = self.fc2(x)
         x = self.bn2(x)
         x = f.relu(x)
         x = self.fc3(x)
         x = self.bn3(x)
-        x = self.drop2(x)
-        x = f.relu(x)
+        x = f.leaky_relu(x)
         x = self.fc4(x)
         x = self.bn4(x)
         x = f.relu(x)
-        out = self.fc5(x)
+        x = self.fc5(x)
+        x = self.drop2(x)
+        x = self.bn5(x)
+        x = f.leaky_relu(x)
+        out = self.fc6(x)
         return out
 
 class Memory:
@@ -125,8 +130,8 @@ class brain:
             #print list(x.grad for x in  self.net.parameters())
             #print "\n"
             print self.scores.get_score(),td_loss.item()
-            for p in self.net.parameters():
-                p.data.clamp_(-1,1)
+            #for p in self.net.parameters():
+                #p.data.clamp_(-1,1)
             #with open("/root/Desktop/loss.txt",'a+') as F:
              #   F.write(str(td_loss.item())+'\n')
             #print "\n"

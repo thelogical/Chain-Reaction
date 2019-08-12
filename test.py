@@ -214,8 +214,8 @@ while not is_done():
     if first:
         st = get_st()
         first = False
-    time.sleep(1)
     box1 = Prediction_Network.next_action(st, get_valid(),True)
+    #time.sleep(1)
     start_fission(box1, player)
     if ended == 1:
         clear_board()
@@ -226,7 +226,7 @@ while not is_done():
     Prediction_Network.scores.push(reward)
     player = 1
     box2 = get_random_choice()
-    time.sleep(1)
+    #time.sleep(1)
     start_fission(box2, player)
     St = get_st()
     if ended == 1:
